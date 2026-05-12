@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { supabase } from './supabase';
 import Auth from './components/Auth.vue';
 import Sidebar from './components/Sidebar.vue';
+import { SpeedInsights } from '@vercel/speed-insights/vue';
 
 const session = ref(null);
 const isInitializing = ref(true);
@@ -41,6 +42,7 @@ const handleLogout = async () => {
 </script>
 
 <template>
+  <SpeedInsights />
   <div v-if="isInitializing" class="loading-screen">
     <p>SYSTEM LOADING...</p>
   </div>
