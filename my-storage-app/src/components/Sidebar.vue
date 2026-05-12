@@ -76,11 +76,38 @@ defineEmits(['logout']);
 }
 
 .out-btn {
-  background: none;
+  background: transparent;
   border: 1px solid #ff5f5f;
   color: #ff5f5f;
-  padding: 10px;
+  padding: 10px 20px;
   cursor: pointer;
   border-radius: 8px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  
+  /* 基礎過渡效果 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  
+  /* 淡淡的紅色外光暈 */
+  box-shadow: 0 0 5px rgba(255, 95, 95, 0.2);
+}
+
+.out-btn:hover {
+  background: rgba(255, 95, 95, 0.1);
+  color: #fff;
+  border-color: #ff8e8e;
+  
+  /* 懸停時產生的強烈霓虹感 */
+  box-shadow: 0 0 15px rgba(255, 95, 95, 0.6),
+              inset 0 0 10px rgba(255, 95, 95, 0.3);
+  text-shadow: 0 0 5px #fff;
+  transform: translateY(-1px);
+}
+
+.out-btn:active {
+  transform: translateY(1px) scale(0.95);
+  box-shadow: 0 0 5px rgba(255, 95, 95, 0.8);
 }
 </style>
