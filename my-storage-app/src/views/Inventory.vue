@@ -603,20 +603,21 @@ const getQuantityClass = (qty) => {
 .add-btn {
     /* 漸層背景：深紫到螢光紫 */
     background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
-    color: #fff; /* 改為白色增加對比度，或維持黑色但要加發光 */
+    color: #fff;
+    /* 改為白色增加對比度，或維持黑色但要加發光 */
     border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 12px 28px;
     border-radius: 12px;
     font-weight: 800;
     cursor: pointer;
-    
+
     /* 核心特效：外發光 */
     box-shadow: 0 0 15px rgba(192, 132, 252, 0.4);
-    
+
     /* 字母間距增加科技感 */
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    
+
     /* 動畫過渡 */
     transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
     position: relative;
@@ -628,8 +629,9 @@ const getQuantityClass = (qty) => {
     transform: translateY(-2px) scale(1.05);
     background: linear-gradient(135deg, #c084fc 0%, #d8b4fe 100%);
     box-shadow: 0 0 25px rgba(192, 132, 252, 0.7),
-                0 0 5px rgba(255, 255, 255, 0.5);
-    color: #000; /* 懸停時變回黑色，產生反差 */
+        0 0 5px rgba(255, 255, 255, 0.5);
+    color: #000;
+    /* 懸停時變回黑色，產生反差 */
 }
 
 /* 點擊回饋：按壓感 */
@@ -646,7 +648,7 @@ const getQuantityClass = (qty) => {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     transform: rotate(45deg);
     transition: 0.5s;
     pointer-events: none;
@@ -968,6 +970,8 @@ textarea {
 
 .no-spin[type="number"] {
     -moz-appearance: textfield;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .qty-control {
