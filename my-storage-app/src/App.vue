@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { Analytics } from '@vercel/analytics/vue';
 import { supabase } from './supabase';
 import Auth from './components/Auth.vue';
 import Sidebar from './components/Sidebar.vue';
@@ -41,6 +42,8 @@ const handleLogout = async () => {
 </script>
 
 <template>
+  <Analytics />
+  
   <div v-if="isInitializing" class="loading-screen">
     <p>SYSTEM LOADING...</p>
   </div>
