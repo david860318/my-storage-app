@@ -419,7 +419,7 @@ const getQuantityClass = (qty) => {
             <div class="title-group">
                 <h1>📦庫存清單</h1>
                 <span class="count-badge">{{ filteredItems.length }} 項</span>
-                <span class="total-badge">總價值: NT$ {{ totalAmount.toLocaleString() }}</span>
+                <span class="total-badge">總價: NT$ {{ totalAmount.toLocaleString() }}</span>
             </div>
             <button class="add-btn" @click="openAddModal">+ 新增物品</button>
         </header>
@@ -1160,7 +1160,7 @@ textarea {
     align-items: center;
     margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px solid #222;
+    border-top: 1px solid #fff;
     /* 增加一條細微的分隔線 */
     font-size: 0.85rem;
     color: #aaa;
