@@ -756,62 +756,115 @@ const getQuantityClass = (item) => {
             </div>
         </main>
 
-        <!-- 模式二：清單表格檢視 (Compact List / Table View) -->
-        <div v-else-if="filteredItems.length > 0 && viewMode === 'list'" class="table-container">
-            <table class="inventory-table">
-                <thead>
-                    <tr>
-                        <th width="40">收藏</th>
-                        <th width="60">照片</th>
-                        <th>編號</th>
-                        <th>物品名稱</th>
-                        <th>分類標籤</th>
-                        <th>存放位置</th>
-                        <th class="text-right">單價</th>
-                        <th class="text-center">庫存數量</th>
-                        <th>保存期限</th>
-                        <th width="80" class="text-center">操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item in filteredItems" :key="item.id" @click="openEditModal(item)">
-                        <td class="text-center" @click.stop>
-                            <button class="star-btn" :class="{ active: item.is_favorite }" @click="toggleFavorite(item)">
+        <!-- 模式二：清單檢視 (List View) -->
+        <div v-else-if="filteredItems.length > 0 && viewMode === 'list'" class="list-view-section">
+            <!-- 1. 手機端專屬：極致美學橫式卡片清單 (100% 貼合手機螢幕，排版美觀、層次分明) -->
+            <div class="mobile-item-list">
+                <div v-for="item in filteredItems" :key="'mob-' + item.id" class="mob-item-card" :class="{ 'is-fav': item.is_favorite }" @click="openEditModal(item)">
+                    <div class="mob-card-media">
+                        <div class="mob-thumb" :style="{ backgroundImage: `url(${item.imageUrl || 'https://placehold.co/120x120/12101a/4a3b69?text=📦'})` }">
+                            <button class="mob-star-badge" :class="{ active: item.is_favorite }" @click.stop="toggleFavorite(item)" title="切換收藏">
                                 {{ item.is_favorite ? '★' : '☆' }}
                             </button>
-                        </td>
-                        <td>
-                            <div class="table-thumb" :style="{ backgroundImage: `url(${item.imageUrl || 'https://placehold.co/100x100/111/444?text=-'})` }"></div>
-                        </td>
-                        <td class="code-col">{{ item.item_code || '-' }}</td>
-                        <td class="name-col">
-                            <strong>{{ item.name }}</strong>
-                            <small v-if="item.brand" class="brand-sub">{{ item.brand }}</small>
-                        </td>
-                        <td>
-                            <span v-for="cat in parseItemCategories(item.category_id)" :key="cat" class="mini-badge">{{ cat }}</span>
-                        </td>
-                        <td class="loc-col">📍 {{ item.location || '-' }}</td>
-                        <td class="text-right price-col">NT$ {{ (item.price || 0).toLocaleString() }}</td>
-                        <td class="text-center" @click.stop>
-                            <div class="quick-qty-box">
-                                <button class="quick-btn" @click="changeQuantity(item, -1)" :disabled="item.quantity <= 0">-</button>
-                                <span class="qty-display" :class="getQuantityClass(item)">{{ item.quantity }}</span>
-                                <button class="quick-btn" @click="changeQuantity(item, 1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="mob-card-body">
+                        <div class="mob-row-top">
+                            <div class="mob-title-wrap">
+                                <h4 class="mob-title">{{ item.name }}</h4>
+                                <span v-if="item.brand" class="mob-brand">({{ item.brand }})</span>
                             </div>
-                        </td>
-                        <td>
-                            <span v-if="getExpiryStatus(item.expiry_date)" :class="getExpiryStatus(item.expiry_date).class" class="mini-expiry">
-                                {{ getExpiryStatus(item.expiry_date).text }}
+                            <span class="mob-price-tag">NT$ {{ (item.price || 0).toLocaleString() }}</span>
+                        </div>
+
+                        <div class="mob-row-meta">
+                            <span class="mob-loc-chip">
+                                📍 {{ item.location || '未標記位置' }}
                             </span>
-                            <span v-else class="text-muted">-</span>
-                        </td>
-                        <td class="text-center">
-                            <button class="edit-link" @click.stop="openEditModal(item)">編輯</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <span v-for="cat in parseItemCategories(item.category_id).slice(0, 2)" :key="cat" class="mob-tag-chip">
+                                {{ cat }}
+                            </span>
+                            <span v-if="item.item_code" class="mob-code-chip">#{{ item.item_code }}</span>
+                        </div>
+
+                        <div class="mob-row-bottom">
+                            <div class="mob-status-col">
+                                <span v-if="getExpiryStatus(item.expiry_date)" :class="getExpiryStatus(item.expiry_date).class" class="mini-expiry-badge">
+                                    {{ getExpiryStatus(item.expiry_date).text }}
+                                </span>
+                                <span v-else-if="item.quantity <= (item.min_quantity || 1)" class="mob-low-alert">
+                                    ⚠️ 庫存偏低
+                                </span>
+                            </div>
+
+                            <div class="mob-stepper-pill" @click.stop>
+                                <button class="stepper-btn minus" @click="changeQuantity(item, -1)" :disabled="item.quantity <= 0" aria-label="減少">−</button>
+                                <span class="stepper-value" :class="getQuantityClass(item)">x{{ item.quantity }}</span>
+                                <button class="stepper-btn plus" @click="changeQuantity(item, 1)" aria-label="增加">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 電腦端專屬：完整 10 欄寬表格 (桌面瀏覽大器俐落) -->
+            <div class="desktop-table-container table-container">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th width="40">收藏</th>
+                            <th width="60">照片</th>
+                            <th>編號</th>
+                            <th>物品名稱</th>
+                            <th>分類標籤</th>
+                            <th>存放位置</th>
+                            <th class="text-right">單價</th>
+                            <th class="text-center">庫存數量</th>
+                            <th>保存期限</th>
+                            <th width="80" class="text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in filteredItems" :key="item.id" @click="openEditModal(item)">
+                            <td class="text-center" @click.stop>
+                                <button class="star-btn" :class="{ active: item.is_favorite }" @click="toggleFavorite(item)">
+                                    {{ item.is_favorite ? '★' : '☆' }}
+                                </button>
+                            </td>
+                            <td>
+                                <div class="table-thumb" :style="{ backgroundImage: `url(${item.imageUrl || 'https://placehold.co/100x100/111/444?text=-'})` }"></div>
+                            </td>
+                            <td class="code-col">{{ item.item_code || '-' }}</td>
+                            <td class="name-col">
+                                <strong>{{ item.name }}</strong>
+                                <small v-if="item.brand" class="brand-sub">{{ item.brand }}</small>
+                            </td>
+                            <td>
+                                <span v-for="cat in parseItemCategories(item.category_id)" :key="cat" class="mini-badge">{{ cat }}</span>
+                            </td>
+                            <td class="loc-col">📍 {{ item.location || '-' }}</td>
+                            <td class="text-right price-col">NT$ {{ (item.price || 0).toLocaleString() }}</td>
+                            <td class="text-center" @click.stop>
+                                <div class="quick-qty-box">
+                                    <button class="quick-btn" @click="changeQuantity(item, -1)" :disabled="item.quantity <= 0">-</button>
+                                    <span class="qty-display" :class="getQuantityClass(item)">{{ item.quantity }}</span>
+                                    <button class="quick-btn" @click="changeQuantity(item, 1)">+</button>
+                                </div>
+                            </td>
+                            <td>
+                                <span v-if="getExpiryStatus(item.expiry_date)" :class="getExpiryStatus(item.expiry_date).class" class="mini-expiry">
+                                    {{ getExpiryStatus(item.expiry_date).text }}
+                                </span>
+                                <span v-else class="text-muted">-</span>
+                            </td>
+                            <td class="text-center">
+                                <button class="edit-link" @click.stop="openEditModal(item)">編輯</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div v-else class="empty-state">
@@ -2085,4 +2138,796 @@ input:focus, select:focus, textarea:focus {
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; transform: scale(0.95); }
 .scrollable::-webkit-scrollbar { width: 6px; }
 .scrollable::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+
+/* ========================================================
+   極致美學升級：手機專屬橫式清單卡片 (Mobile List View)
+   ======================================================== */
+.mobile-item-list {
+    display: none; /* 電腦版隱藏 */
+}
+
+.desktop-table-container {
+    display: block;
+}
+
+/* ========================================================
+   全面 RWD 響應式優化 (手機、平板與折疊螢幕深度美化，絕不超出畫面)
+   ======================================================== */
+
+/* 平板與中螢幕適配 (769px ~ 1024px) */
+@media (max-width: 1024px) {
+    .inventory-page {
+        padding: 20px 16px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px;
+    }
+
+    .controls-main-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .dropdown-group {
+        width: 100% !important;
+        display: flex !important;
+        gap: 10px !important;
+    }
+
+    .select-box {
+        flex: 1 !important;
+    }
+
+    .custom-select {
+        width: 100% !important;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+        gap: 16px !important;
+    }
+}
+
+/* 手機版主力適配 (<= 768px) */
+@media (max-width: 768px) {
+    /* 容器保證絕不橫向溢出 */
+    .inventory-page {
+        padding: 0 0 36px 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 頂部 Header 自適應堆疊，精緻霓虹字體 */
+    .page-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .header-title h1 {
+        font-size: 1.45rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.5px !important;
+        background: linear-gradient(135deg, #ffffff 0%, #c084fc 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        word-break: break-word;
+    }
+
+    .header-title .subtitle {
+        font-size: 0.78rem !important;
+        color: #9494a0 !important;
+        margin-top: 3px !important;
+        line-height: 1.4 !important;
+    }
+
+    .header-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .view-toggle {
+        display: flex !important;
+        flex-shrink: 0;
+        background: rgba(10, 8, 16, 0.7) !important;
+        border: 1px solid rgba(188, 19, 254, 0.3) !important;
+        border-radius: 12px !important;
+        padding: 2px !important;
+    }
+
+    .view-toggle button {
+        padding: 7px 12px !important;
+        font-size: 0.95rem !important;
+        border-radius: 8px !important;
+    }
+
+    .export-btn {
+        flex: 1 !important;
+        min-width: 0 !important;
+        padding: 9px 10px !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        text-align: center !important;
+        justify-content: center !important;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .add-btn {
+        flex: 1.4 !important;
+        min-width: 0 !important;
+        padding: 9px 14px !important;
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        justify-content: center !important;
+        border-radius: 12px !important;
+        letter-spacing: 0.5px !important;
+        background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%) !important;
+        box-shadow: 0 0 15px rgba(192, 132, 252, 0.4) !important;
+    }
+
+    /* KPI 卡片看板：手機 2x2 曜石磨砂玻璃風格 */
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .kpi-card {
+        padding: 10px 12px !important;
+        gap: 10px !important;
+        border-radius: 14px !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        background: rgba(18, 14, 28, 0.75) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(192, 132, 252, 0.18) !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .kpi-icon {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 1.15rem !important;
+        border-radius: 10px !important;
+        flex-shrink: 0;
+        background: rgba(188, 19, 254, 0.12) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .kpi-label {
+        font-size: 0.68rem !important;
+        color: #9494a0 !important;
+        letter-spacing: 0.5px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kpi-value {
+        font-size: 1.05rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.3px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kpi-value small {
+        font-size: 0.65rem !important;
+        font-weight: normal;
+        margin-left: 2px;
+    }
+
+    /* 搜尋與篩選面板：完全消除 min-width，精緻磨砂質感 */
+    .controls-card {
+        padding: 12px 14px !important;
+        border-radius: 16px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        background: rgba(18, 14, 28, 0.7) !important;
+        border: 1px solid rgba(188, 19, 254, 0.22) !important;
+    }
+
+    .controls-main-row {
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .search-box {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+        position: relative;
+    }
+
+    .search-box .main-input {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 16px !important; /* 避免 iOS 縮放 */
+        padding: 11px 14px 11px 38px !important;
+        border-radius: 12px !important;
+        background: rgba(10, 8, 16, 0.75) !important;
+        border: 1px solid rgba(188, 19, 254, 0.35) !important;
+        color: #fff !important;
+    }
+
+    .search-icon {
+        left: 12px !important;
+        font-size: 0.9rem !important;
+        color: #c084fc !important;
+    }
+
+    .clear-search-btn {
+        right: 10px !important;
+    }
+
+    .dropdown-group {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .select-box {
+        flex: 1 !important;
+        min-width: 0 !important;
+        width: 50% !important;
+        position: relative;
+    }
+
+    .custom-select {
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 8px 8px 28px !important;
+        height: 42px !important;
+        border-radius: 10px !important;
+        text-overflow: ellipsis;
+        box-sizing: border-box !important;
+        background: rgba(10, 8, 16, 0.75) !important;
+        border: 1px solid rgba(188, 19, 254, 0.3) !important;
+        color: #e0d5ff !important;
+    }
+
+    .select-icon {
+        left: 8px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .filter-sub-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .filter-section-title {
+        font-size: 0.7rem !important;
+        color: #a855f7 !important;
+        letter-spacing: 0.5px !important;
+        font-weight: 700 !important;
+        min-width: 0 !important;
+    }
+
+    /* 快捷狀態膠囊：橫向平滑滑動 */
+    .quick-filter-pills {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 6px !important;
+        padding-bottom: 2px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .quick-filter-pills::-webkit-scrollbar {
+        display: none;
+    }
+
+    .pill-btn {
+        flex-shrink: 0 !important;
+        padding: 5px 11px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        border-radius: 8px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .pill-btn.active {
+        background: rgba(192, 132, 252, 0.2) !important;
+        border-color: #c084fc !important;
+        color: #c084fc !important;
+    }
+
+    /* 標籤分類：橫向平滑滑動 */
+    .filter-categories {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 6px !important;
+        padding-bottom: 2px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .filter-categories::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-btn {
+        flex-shrink: 0 !important;
+        padding: 5px 12px !important;
+        font-size: 0.78rem !important;
+        white-space: nowrap !important;
+        border-radius: 8px !important;
+    }
+
+    /* ----------------------------------------------------
+       模式一：網格卡片清單 (Grid View on Mobile) 美化
+       ---------------------------------------------------- */
+    .grid-container {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .card {
+        border-radius: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        background: rgba(18, 14, 28, 0.85) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(192, 132, 252, 0.22) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .card:active {
+        transform: scale(0.985) !important;
+        border-color: #c084fc !important;
+    }
+
+    .card .img-box {
+        height: 185px !important;
+        width: 100% !important;
+        position: relative !important;
+    }
+
+    .card .info {
+        padding: 12px 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .card .title-row h3 {
+        font-size: 1.05rem !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+    }
+
+    .card .info-top .price-tag {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 1rem !important;
+        font-weight: 800 !important;
+        color: #fbbf24 !important;
+        text-shadow: 0 0 10px rgba(251, 191, 36, 0.25) !important;
+    }
+
+    /* ----------------------------------------------------
+       模式二：手機專屬極致美學橫式卡片清單 (List View on Mobile)
+       ---------------------------------------------------- */
+    .mobile-item-list {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .desktop-table-container {
+        display: none !important;
+    }
+
+    .mob-item-card {
+        background: rgba(18, 14, 28, 0.85) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border: 1px solid rgba(192, 132, 252, 0.18) !important;
+        border-radius: 16px !important;
+        padding: 12px 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .mob-item-card.is-fav {
+        border-left: 3px solid #fbbf24 !important;
+    }
+
+    .mob-item-card:active {
+        transform: scale(0.985) !important;
+        border-color: #00f2ff !important;
+    }
+
+    .mob-card-media {
+        flex-shrink: 0 !important;
+    }
+
+    .mob-thumb {
+        width: 68px !important;
+        height: 68px !important;
+        border-radius: 12px !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-color: #12101a !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        position: relative !important;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .mob-star-badge {
+        position: absolute !important;
+        top: 3px !important;
+        left: 3px !important;
+        background: rgba(0, 0, 0, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        color: #777 !important;
+        width: 22px !important;
+        height: 22px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.75rem !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .mob-star-badge.active {
+        color: #fbbf24 !important;
+        border-color: #fbbf24 !important;
+        text-shadow: 0 0 8px rgba(251, 191, 36, 0.7) !important;
+    }
+
+    .mob-card-body {
+        flex: 1 !important;
+        min-width: 0 !important; /* 防止長文字撐破 flex */
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 5px !important;
+    }
+
+    .mob-row-top {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+
+    .mob-title-wrap {
+        display: flex !important;
+        align-items: baseline !important;
+        gap: 4px !important;
+        min-width: 0 !important;
+        flex: 1 !important;
+    }
+
+    .mob-title {
+        font-size: 0.98rem !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        line-height: 1.35 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .mob-brand {
+        font-size: 0.72rem !important;
+        color: #8a8a93 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .mob-price-tag {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.92rem !important;
+        font-weight: 800 !important;
+        color: #fbbf24 !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        text-shadow: 0 0 10px rgba(251, 191, 36, 0.25) !important;
+    }
+
+    /* 中部元數據標籤膠囊 */
+    .mob-row-meta {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-wrap: wrap !important;
+        margin: 1px 0 !important;
+    }
+
+    .mob-loc-chip {
+        font-size: 0.72rem !important;
+        color: #d4d4d8 !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        padding: 2px 7px !important;
+        border-radius: 6px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 120px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 2px !important;
+    }
+
+    .mob-tag-chip {
+        font-size: 0.7rem !important;
+        color: #c084fc !important;
+        background: rgba(188, 19, 254, 0.12) !important;
+        border: 1px solid rgba(188, 19, 254, 0.3) !important;
+        padding: 2px 7px !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+    }
+
+    .mob-code-chip {
+        font-size: 0.7rem !important;
+        color: #00f2ff !important;
+        background: rgba(0, 242, 255, 0.08) !important;
+        border: 1px solid rgba(0, 242, 255, 0.25) !important;
+        padding: 2px 6px !important;
+        border-radius: 6px !important;
+        font-family: monospace !important;
+        white-space: nowrap !important;
+    }
+
+    /* 底部操作與步進加減器 (Stepper) */
+    .mob-row-bottom {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-top: 2px !important;
+        padding-top: 6px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+        gap: 8px !important;
+    }
+
+    .mob-status-col {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    .mini-expiry-badge {
+        font-size: 0.68rem !important;
+        padding: 2px 6px !important;
+        border-radius: 5px !important;
+        font-weight: 600 !important;
+    }
+
+    .mob-low-alert {
+        font-size: 0.7rem !important;
+        color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.12) !important;
+        padding: 2px 6px !important;
+        border-radius: 5px !important;
+        font-weight: 600 !important;
+    }
+
+    /* 一體化現代跑道步進器 (Stepper Pill) */
+    .mob-stepper-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        background: rgba(10, 8, 16, 0.85) !important;
+        border: 1px solid rgba(188, 19, 254, 0.35) !important;
+        border-radius: 20px !important;
+        padding: 2px 3px !important;
+        gap: 4px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .stepper-btn {
+        width: 26px !important;
+        height: 26px !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: none !important;
+        color: #e4e4e7 !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+        transition: all 0.15s ease !important;
+    }
+
+    .stepper-btn:hover:not(:disabled),
+    .stepper-btn:active:not(:disabled) {
+        background: #c084fc !important;
+        color: #000 !important;
+    }
+
+    .stepper-btn:disabled {
+        opacity: 0.25 !important;
+        cursor: not-allowed !important;
+    }
+
+    .stepper-value {
+        font-size: 0.88rem !important;
+        font-weight: 800 !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        min-width: 32px !important;
+        text-align: center !important;
+        color: #fff !important;
+    }
+
+    .stepper-value.low-stock {
+        color: #f87171 !important;
+        text-shadow: 0 0 6px rgba(248, 113, 113, 0.6) !important;
+    }
+
+    /* 彈窗 Dialog：手機端底部抽屜樣式 (Bottom Sheet) */
+    .overlay {
+        padding: 0 !important;
+        align-items: flex-end !important;
+    }
+
+    .modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh !important;
+        border-radius: 22px 22px 0 0 !important;
+        margin: 0 !important;
+        border-bottom: none !important;
+        animation: slideUpModal 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    @keyframes slideUpModal {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        padding: 14px 18px !important;
+    }
+
+    .modal-header h2 {
+        font-size: 1.15rem !important;
+    }
+
+    .close-x {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 1.2rem !important;
+    }
+
+    .modal-body {
+        padding: 16px 14px !important;
+        max-height: calc(92vh - 130px) !important;
+    }
+
+    .image-preview-box {
+        height: 140px !important;
+    }
+
+    .form-grid {
+        gap: 12px !important;
+    }
+
+    .form-grid .row {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .form-grid input,
+    .form-grid select,
+    .form-grid textarea {
+        font-size: 16px !important; /* 避免 iOS 縮放 */
+        padding: 11px 12px !important;
+        border-radius: 10px !important;
+    }
+
+    .qty-control button {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1.2rem !important;
+    }
+
+    .qty-control input {
+        height: 44px !important;
+        font-size: 1rem !important;
+    }
+
+    .modal-footer {
+        padding: 12px 14px !important;
+        gap: 8px !important;
+    }
+
+    .modal-footer button {
+        padding: 11px 16px !important;
+        font-size: 0.9rem !important;
+        min-height: 42px !important;
+        border-radius: 10px !important;
+    }
+
+    .lightbox-content {
+        max-width: 95vw !important;
+        max-height: 80vh !important;
+        padding: 8px !important;
+    }
+}
+
+/* 超窄螢幕適配 (如 iPhone SE, 375px 及以下) */
+@media (max-width: 400px) {
+    .dropdown-group {
+        flex-direction: column !important;
+    }
+
+    .header-actions .export-btn,
+    .header-actions .add-btn {
+        width: 100% !important;
+        flex: 100% !important;
+    }
+}
+
 </style>
