@@ -225,7 +225,7 @@ const addNewCategory = async () => {
 // ==========================================
 // 6. 安全檔案處理與 Modal 控制
 // ==========================================
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
 
 const handleFileChange = async (e) => {
@@ -233,7 +233,7 @@ const handleFileChange = async (e) => {
     if (!selectedFile) return;
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-        alert('檔案大小不能超過 10MB');
+        alert('檔案大小不能超過 15MB');
         e.target.value = '';
         return;
     }
@@ -897,7 +897,7 @@ const getQuantityClass = (item) => {
                                 <input type="file" @change="handleFileChange" accept="image/*,image/heic" class="hidden-input" />
                                 <div v-if="imagePreview" class="preview-overlay">
                                     <img :src="imagePreview" class="img-content" />
-                                    <div class="change-hint">點擊更換照片 (上限 10MB)</div>
+                                    <div class="change-hint">點擊更換照片 (上限 15MB)</div>
                                 </div>
                                 <div v-else class="upload-placeholder">
                                     <span>📸 點擊上傳實體物品照片</span>
