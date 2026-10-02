@@ -17,7 +17,7 @@ const emit = defineEmits(['logout', 'close']);
 const router = useRouter();
 const route = useRoute();
 
-// 點擊項目時保證收合側邊欄並跳轉
+// 導航並保證收起側邊欄 (無論是否為當前頁面，點擊一定收起)
 const handleNav = (path) => {
   emit('close');
   if (route.path !== path) {
@@ -33,14 +33,13 @@ const handleClose = () => {
 <template>
   <aside class="side-nav" :class="{ 'is-open': isOpen }">
     <div class="side-header">
-      <div class="logo" @click="handleClose">
-        <span class="logo-icon">✨</span> 收納小幫手
-      </div>
-      <!-- 手機版大尺寸 ✕ 收起按鈕 -->
-      <!-- <button class="mobile-close-btn" @click.stop="handleClose" aria-label="收起選單">✕</button> -->
+      <div class="logo" @click="handleClose">收納小幫手</div>
+      <!-- 超大 44x44px 觸控熱區的關閉按鈕 -->
+      <button class="mobile-close-btn" @click.stop="handleClose" aria-label="關閉選單">✕</button>
     </div>
     
     <nav class="links">
+      <!-- 點擊必定觸發 handleNav 關閉側邊欄 -->
       <div 
         class="item" 
         :class="{ active: route.path === '/' }" 
@@ -66,11 +65,7 @@ const handleClose = () => {
       </div>
     </nav>
 
-    <div class="side-footer">
-      <button @click="$emit('logout'); handleClose()" class="out-btn">
-        <span class="out-icon">🚪</span> 登出系統
-      </button>
-    </div>
+    <button @click="$emit('logout'); handleClose()" class="out-btn">登出</button>
   </aside>
 </template>
 
@@ -82,50 +77,41 @@ const handleClose = () => {
   left: 0;
   top: 0;
   background: #111116;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid #222;
   display: flex;
   flex-direction: column;
-  padding: 24px 18px;
+  padding: 24px 20px;
   z-index: 1000;
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .side-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
   min-height: 44px;
 }
 
 .logo {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: bold;
   color: var(--accent, #c084fc);
   letter-spacing: 1px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
 }
 
-.logo-icon {
-  font-size: 1.2rem;
-}
-
-/* 手機版關閉按鈕：40x40px 舒適點擊尺寸 */
+/* 手機版關閉按鈕：加大熱區至 44x44px，極易點按 */
 .mobile-close-btn {
   display: none;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  color: #aaa;
-  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #ddd;
+  font-size: 1.3rem;
   cursor: pointer;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   align-items: center;
   justify-content: center;
   line-height: 1;
@@ -135,7 +121,7 @@ const handleClose = () => {
 
 .mobile-close-btn:hover,
 .mobile-close-btn:active {
-  background: rgba(255, 95, 95, 0.2);
+  background: rgba(255, 95, 95, 0.25);
   border-color: #ff5f5f;
   color: #ff5f5f;
   transform: scale(0.92);
@@ -145,18 +131,18 @@ const handleClose = () => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .item {
-  color: #999;
-  padding: 13px 16px;
-  border-radius: 12px;
+  color: #888;
+  padding: 14px 16px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
@@ -165,51 +151,42 @@ const handleClose = () => {
 
 .item:hover {
   background: rgba(192, 132, 252, 0.08);
-  color: #fff;
+  color: #ddd;
 }
 
 .item.active {
   background: rgba(192, 132, 252, 0.15) !important;
   color: #c084fc !important;
-  font-weight: 700;
   border-left: 3px solid #c084fc;
 }
 
-.side-footer {
-  padding-top: 15px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
 .out-btn {
-  width: 100%;
-  background: rgba(255, 95, 95, 0.05);
-  border: 1px solid rgba(255, 95, 95, 0.4);
+  background: transparent;
+  border: 1px solid #ff5f5f;
   color: #ff5f5f;
-  padding: 12px 18px;
+  padding: 12px 20px;
   cursor: pointer;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  font-weight: bold;
   letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.25s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 5px rgba(255, 95, 95, 0.2);
+  min-height: 44px;
 }
 
 .out-btn:hover {
-  background: rgba(255, 95, 95, 0.15);
+  background: rgba(255, 95, 95, 0.1);
   color: #fff;
   border-color: #ff8e8e;
-  box-shadow: 0 0 15px rgba(255, 95, 95, 0.4);
+  box-shadow: 0 0 15px rgba(255, 95, 95, 0.6);
+  transform: translateY(-1px);
 }
 
 .out-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
-/* RWD 手機版：無遮罩平滑抽屜收折 */
+/* RWD 手機版：強制抽屜滑動與收折 */
 @media (max-width: 768px) {
   .mobile-close-btn {
     display: flex;
@@ -222,7 +199,7 @@ const handleClose = () => {
 
   .side-nav.is-open {
     transform: translateX(0) !important;
-    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.9) !important;
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.85) !important;
   }
 }
 </style>
