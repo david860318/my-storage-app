@@ -35,7 +35,7 @@ const handleClose = () => {
     <div class="side-header">
       <div class="logo" @click="handleClose">收納小幫手</div>
       <!-- 超大 44x44px 觸控熱區的關閉按鈕 -->
-      <button class="mobile-close-btn" @click.stop="handleClose" aria-label="關閉選單">✕</button>
+      <!-- <button class="mobile-close-btn" @click.stop="handleClose" aria-label="關閉選單">✕</button> -->
     </div>
     
     <nav class="links">
