@@ -1000,6 +1000,12 @@ const getQuantityClass = (item) => {
                 </div>
             </div>
         </transition>
+    
+        <!-- 右下角懸浮快捷新增按鈕 (FAB) -->
+        <button class="fab-add-btn" @click="openAddModal" aria-label="新增物品" title="快速新增物品">
+            <span class="fab-icon">+</span>
+        </button>
+
     </div>
 </template>
 
@@ -2927,6 +2933,88 @@ input:focus, select:focus, textarea:focus {
     .header-actions .add-btn {
         width: 100% !important;
         flex: 100% !important;
+    }
+}
+
+
+
+/* ========================================================
+   右下角懸浮新增按鈕 (Cyberpunk Neon FAB)
+   ======================================================== */
+.fab-add-btn {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7 0%, #00f2ff 100%);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(188, 19, 254, 0.5),
+                0 0 15px rgba(0, 242, 255, 0.4);
+    z-index: 990;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    animation: fabPulse 3s infinite;
+}
+
+@keyframes fabPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(188, 19, 254, 0.6),
+                    0 8px 25px rgba(0, 242, 255, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 14px rgba(188, 19, 254, 0),
+                    0 8px 25px rgba(0, 242, 255, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(188, 19, 254, 0),
+                    0 8px 25px rgba(0, 242, 255, 0.4);
+    }
+}
+
+.fab-icon {
+    font-size: 2.2rem;
+    font-weight: 300;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    margin-top: -2px;
+}
+
+.fab-add-btn:hover {
+    transform: scale(1.12) rotate(90deg);
+    box-shadow: 0 10px 35px rgba(188, 19, 254, 0.8),
+                0 0 25px rgba(0, 242, 255, 0.7);
+    border-color: #fff;
+}
+
+.fab-add-btn:active {
+    transform: scale(0.92) rotate(90deg);
+    box-shadow: 0 4px 15px rgba(188, 19, 254, 0.8);
+}
+
+/* 手機版 FAB 尺寸與安全邊界適配 */
+@media (max-width: 768px) {
+    .fab-add-btn {
+        bottom: max(24px, env(safe-area-inset-bottom) + 18px) !important;
+        right: 20px !important;
+        width: 56px !important;
+        height: 56px !important;
+        box-shadow: 0 6px 20px rgba(188, 19, 254, 0.6),
+                    0 0 15px rgba(0, 242, 255, 0.45) !important;
+    }
+
+    .fab-icon {
+        font-size: 2rem !important;
     }
 }
 
